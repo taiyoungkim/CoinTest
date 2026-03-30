@@ -22,3 +22,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "CoinTest"
 include(":app")
+include(":feature:list")
+include(":feature:orderbook")
+include(":data")
+include(":domain")
+include(":core:network")
+include(":core:ui")
