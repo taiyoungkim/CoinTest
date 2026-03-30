@@ -3,6 +3,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 class AndroidApplicationConventionPlugin : Plugin<Project> {
@@ -26,8 +27,8 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 }
             }
             tasks.withType(KotlinCompile::class.java).configureEach {
-                kotlinOptions {
-                    jvmTarget = "11"
+                compilerOptions {
+                    jvmTarget.set(JvmTarget.JVM_11)
                 }
             }
         }
