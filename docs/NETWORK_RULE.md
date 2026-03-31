@@ -49,6 +49,93 @@
 
 ---
 
+### 6. Upbit API 명세
+
+Base URL: `https://api.upbit.com`
+
+#### 6.1 마켓 코드 목록 조회
+
+| 항목 | 값 |
+|------|----|
+| **Endpoint** | `GET /v1/market/all` |
+| **인증** | 불필요 |
+| **Rate Limit** | 초당 최대 10회 (IP 단위, 마켓 그룹 공유) |
+
+**Request Parameter**
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|---------|------|------|------|
+| `is_details` | Boolean | No | 유의종목/관리종목 상세 포함 여부. 기본값 false |
+
+**Response (배열)** → `MarketDto`
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `market` | String | 마켓 코드 (예: "KRW-BTC") |
+| `korean_name` | String | 한글 종목명 (예: "비트코인") |
+| `english_name` | String | 영문 종목명 (예: "Bitcoin") |
+| `market_event.warning` | Boolean | 유의종목 지정 여부 (`is_details=true` 시 포함) |
+
+> KRW 마켓만 사용 시: `market.startsWith("KRW-")` 필터 적용
+
+#### 6.2 현재가(Ticker) 조회
+
+| 항목 | 값 |
+|------|----|
+| **Endpoint** | `GET /v1/ticker` |
+| **인증** | 불필요 |
+| **Rate Limit** | 초당 최대 10회 (IP 단위, 현재가 그룹 공유) |
+
+**Request Parameter**
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|---------|------|------|------|
+| `markets` | String | **필수** | 조회할 마켓 코드 목록. 쉼표(,) 구분. 예: `"KRW-BTC,KRW-ETH"` |
+
+**Response (배열)** → `TickerDto`
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `market` | String | 마켓 코드 |
+| `trade_price` | Double | 현재가 (최근 체결가) |
+| `prev_closing_price` | Double | 전일 종가 (UTC 00:00 기준) |
+| `change` | String | 전일 대비 상태: `"RISE"` / `"FALL"` / `"EVEN"` |
+| `change_price` | Double | 전일 종가 대비 변화액 (**절대값**) |
+| `change_rate` | Double | 전일 종가 대비 변화율 (**절대값**) |
+| `signed_change_price` | Double | 전일 종가 대비 변화액 (부호 포함) |
+| `signed_change_rate` | Double | 전일 종가 대비 변화율 (부호 포함) |
+| `high_price` | Double | 24h 최고가 |
+| `low_price` | Double | 24h 최저가 |
+| `trade_volume` | Double | 최근 체결량 |
+| `acc_trade_price` | Double | 누적 거래대금 (UTC 00:00 기준) |
+| `acc_trade_price_24h` | Double | 24시간 누적 거래대금 |
+| `acc_trade_volume` | Double | 누적 거래량 (UTC 00:00 기준) |
+| `acc_trade_volume_24h` | Double | 24시간 누적 거래량 |
+| `trade_date_kst` | String | 최근 체결일 (KST, yyyyMMdd) |
+| `trade_time_kst` | String | 최근 체결시각 (KST, HHmmss) |
+| `timestamp` | Long | 현재가 반영 시각 (ms) |
+
+> ⚠️ UI 표시 시 `change_rate` / `change_price` 대신 반드시 `signed_change_rate` / `signed_change_price` 사용.
+> 색상 판별은 `change` 필드 기준: `"RISE"` → Red, `"FALL"` → Blue, `"EVEN"` → 기본색.
+
+#### 6.3 데이터 조합 흐름 (coin-list)
+
+```
+1. GET /v1/market/all
+   → 전체 마켓 목록 수신
+   → "KRW-" 접두사로 필터링 → KRW 마켓 코드 목록 확보
+
+2. GET /v1/ticker?markets={KRW 마켓 코드 전체, 쉼표 구분}
+   → 현재가/변동률/거래대금 수신
+
+3. market 코드 기준으로 두 응답을 조인
+   → Coin 도메인 모델로 변환 (korean_name + trade_price + signed_change_rate + ...)
+
+4. acc_trade_price_24h 내림차순 정렬 후 UI 반영
+```
+
+---
+
 ### ⚠️ 주의사항 (절대 금지)
 1.  `runCatching` 내부에서 `suspend` 함수를 직접 호출하지 않는다. (CancellationException swallow 방지)
 2.  Data 레이어에서 UI 관련 클래스(Context 등)를 직접 참조하지 않는다.
