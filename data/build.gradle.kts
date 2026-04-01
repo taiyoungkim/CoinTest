@@ -11,4 +11,5 @@ android {
 dependencies {
     implementation(project(":domain"))
     implementation(project(":core:network"))
+    implementation(libs.ktor.client.core)
 }

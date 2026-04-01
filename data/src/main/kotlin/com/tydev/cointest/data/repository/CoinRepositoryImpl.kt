@@ -4,7 +4,10 @@ import com.tydev.cointest.core.network.api.UpbitApiService
 import com.tydev.cointest.data.mapper.mapToCoins
 import com.tydev.cointest.domain.error.NetworkError
 import com.tydev.cointest.domain.model.Coin
+import com.tydev.cointest.domain.monitor.NetworkMonitor
 import com.tydev.cointest.domain.repository.CoinRepository
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.ServerResponseException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,9 +16,13 @@ import javax.inject.Inject
 
 class CoinRepositoryImpl @Inject constructor(
     private val apiService: UpbitApiService,
+    private val networkMonitor: NetworkMonitor,
 ) : CoinRepository {
 
     override suspend fun getCoins(): Result<List<Coin>> {
+        if (!networkMonitor.isOnline) {
+            return Result.failure(NetworkError.Connectivity.toException())
+        }
         return try {
             val markets = withContext(Dispatchers.IO) {
                 apiService.getMarkets().filter { it.market.startsWith("KRW-") }
@@ -30,21 +37,15 @@ class CoinRepositoryImpl @Inject constructor(
             Result.success(coins)
         } catch (e: CancellationException) {
             throw e
+        } catch (e: ClientRequestException) {
+            Result.failure(NetworkError.Api(e.message ?: "클라이언트 오류").toException())
+        } catch (e: ServerResponseException) {
+            Result.failure(NetworkError.Server(e.response.status.value).toException())
         } catch (e: IOException) {
             Result.failure(NetworkError.Connectivity.toException())
         } catch (e: Exception) {
-            val networkError = e.toNetworkError()
-            Result.failure(networkError.toException())
+            Result.failure(NetworkError.Unknown.toException())
         }
-    }
-}
-
-private fun Exception.toNetworkError(): NetworkError {
-    val message = message ?: ""
-    return when {
-        message.contains("5") && message.contains("Server") -> NetworkError.Server(500)
-        message.contains("4") && message.contains("Client") -> NetworkError.Api(message)
-        else -> NetworkError.Unknown
     }
 }
 

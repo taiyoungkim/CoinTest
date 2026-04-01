@@ -1,6 +1,8 @@
 package com.tydev.cointest.data.di
 
+import com.tydev.cointest.data.monitor.ConnectivityNetworkMonitor
 import com.tydev.cointest.data.repository.CoinRepositoryImpl
+import com.tydev.cointest.domain.monitor.NetworkMonitor
 import com.tydev.cointest.domain.repository.CoinRepository
 import dagger.Binds
 import dagger.Module
@@ -15,4 +17,8 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindCoinRepository(impl: CoinRepositoryImpl): CoinRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNetworkMonitor(impl: ConnectivityNetworkMonitor): NetworkMonitor
 }
