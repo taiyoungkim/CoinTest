@@ -6,6 +6,9 @@ plugins {
 
 android {
     namespace = "com.tydev.cointest.core.network"
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {

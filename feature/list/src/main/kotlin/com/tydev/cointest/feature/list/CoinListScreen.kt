@@ -107,7 +107,7 @@ fun CoinListScreen(
                             }
                             items(
                                 items = uiState.coins,
-                                key = { coin -> coin.market },
+                                key = { coin -> coin.symbol },
                             ) { coin ->
                                 CoinListItem(
                                     coin = coin,

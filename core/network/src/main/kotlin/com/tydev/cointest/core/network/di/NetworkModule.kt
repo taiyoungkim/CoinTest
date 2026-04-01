@@ -1,5 +1,6 @@
 package com.tydev.cointest.core.network.di
 
+import com.tydev.cointest.core.network.BuildConfig
 import com.tydev.cointest.core.network.api.UpbitApiService
 import dagger.Module
 import dagger.Provides
@@ -37,8 +38,10 @@ object NetworkModule {
                 isLenient = true
             })
         }
-        install(Logging) {
-            level = LogLevel.INFO
+        if (BuildConfig.DEBUG) {
+            install(Logging) {
+                level = LogLevel.INFO
+            }
         }
         defaultRequest {
             url("https://api.upbit.com/")
