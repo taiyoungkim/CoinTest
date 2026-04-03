@@ -96,6 +96,9 @@ fun CoinListScreen(
                         modifier = Modifier.align(Alignment.Center),
                     )
                 }
+                uiState.coins.isEmpty() -> {
+                    EmptyContent(modifier = Modifier.align(Alignment.Center))
+                }
                 else -> {
                     PullToRefreshBox(
                         isRefreshing = uiState.isRefreshing,
@@ -228,6 +231,21 @@ private fun ErrorContent(
         TextButton(onClick = onRetry) {
             Text("재시도")
         }
+    }
+}
+
+@Composable
+private fun EmptyContent(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = "표시할 종목이 없습니다",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

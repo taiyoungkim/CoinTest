@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.tydev.cointest.feature.list.navigation.CoinListRoute
 import com.tydev.cointest.feature.list.navigation.coinListScreen
+import com.tydev.cointest.feature.orderbook.navigation.OrderBookRoute
+import com.tydev.cointest.feature.orderbook.navigation.orderBookScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,8 +26,11 @@ class MainActivity : ComponentActivity() {
                 ) {
                     coinListScreen(
                         onNavigateToOrderBook = { market ->
-                            // TODO: OrderBook 화면 구현 후 연결
+                            navController.navigate(OrderBookRoute(market))
                         },
+                    )
+                    orderBookScreen(
+                        onNavigateBack = { navController.popBackStack() },
                     )
                 }
             }
