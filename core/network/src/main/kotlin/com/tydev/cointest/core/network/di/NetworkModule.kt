@@ -12,6 +12,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.headers
@@ -37,6 +38,9 @@ object NetworkModule {
                 ignoreUnknownKeys = true
                 isLenient = true
             })
+        }
+        install(WebSockets) {
+            pingIntervalMillis = 20_000L
         }
         if (BuildConfig.DEBUG) {
             install(Logging) {
